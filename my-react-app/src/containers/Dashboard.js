@@ -4,7 +4,7 @@ import PostDetails from '../components/PostDetails';
 
 const Dashboard = () => {
   const [posts, setPosts] = useState([
-    { id: 111, title: 'Happiness', author: 'Kira', content: 'This is the content in the post' },
+    { id: 111, title: 'Happiness', author: 'John', content: 'This is the content in the post' },
     { id: 112, title: 'MIU', author: 'Dean', content: 'This is the content in the post' },
     { id: 113, title: 'Enjoy Life', author: 'Jasmine', content: 'This is the content in the post' }
   ]);
@@ -36,8 +36,9 @@ const Dashboard = () => {
         onChange={(e) => setTitle(e.target.value)} 
         placeholder="Title" 
       />
+      <br></br>
       <button onClick={handleChangeTitle}>Change Name</button>
-      {selectedPost && <PostDetails post={selectedPost} />} {/* Render PostDetails if a post is selected */}
+      {selectedPost && <PostDetails post={selectedPost} />}
     </div>
   );
 };
