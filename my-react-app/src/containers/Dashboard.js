@@ -1,44 +1,74 @@
-import React, { useState } from 'react';
+// Dashboard.js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Posts from '../components/Posts';
-import PostDetails from '../components/PostDetails'; 
+import PostDetails from '../components/PostDetails';
+import AddPost from '../components/AddPost';
 
 const Dashboard = () => {
-  const [posts, setPosts] = useState([
-    { id: 111, title: 'Happiness', author: 'John', content: 'This is the content in the post' },
-    { id: 112, title: 'MIU', author: 'Dean', content: 'This is the content in the post' },
-    { id: 113, title: 'Enjoy Life', author: 'Jasmine', content: 'This is the content in the post' }
-  ]);
-  
-  const [title, setTitle] = useState('');
+  const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [title, setTitle] = useState('');
 
-  const handleChangeTitle = () => {
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/api/posts');
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  const handleSelectPost = async (post) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/posts/${post.id}`);
+      setSelectedPost(response.data);
+    } catch (error) {
+      console.error('Error fetching post details:', error);
+    }
+  };
+
+  const handleChangeTitle = async () => {
     if (title.trim() === '') {
       return;
     }
-
-    const updatedPosts = posts.map(post => 
-      post.id === 111 ? { ...post, title: title } : post
-    );
-    setPosts(updatedPosts);
+    try {
+      await axios.put(`http://localhost:8080/api/posts/1`, { title });
+      fetchPosts(); // Update posts list
+    } catch (error) {
+      console.error('Error updating title:', error);
+    }
   };
 
-  const handleSelectPost = (post) => {
-    setSelectedPost(post);
+  const handleDeletePost = async (postId) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/posts/${postId}`);
+      fetchPosts(); // Update posts list
+      setSelectedPost(null); // Clear selected post
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    }
   };
 
   return (
     <div>
       <Posts posts={posts} onSelectPost={handleSelectPost} />
-      <input 
-        type="text" 
-        value={title} 
-        onChange={(e) => setTitle(e.target.value)} 
-        placeholder="Title" 
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Title"
       />
-      <br></br>
+      <br />
       <button onClick={handleChangeTitle}>Change Name</button>
-      {selectedPost && <PostDetails post={selectedPost} />}
+      {selectedPost && (
+        <PostDetails post={selectedPost} onDelete={handleDeletePost} />
+      )}
+      <AddPost onPostAdded={fetchPosts} />
     </div>
   );
 };
