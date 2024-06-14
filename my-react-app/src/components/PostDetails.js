@@ -1,23 +1,42 @@
 // PostDetails.js
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
 import axios from 'axios';
 import Comment from './Comment';
+import { PostContext } from './PostContext';
 
-const PostDetails = ({ post, onDelete }) => {
+const PostDetails = ({ onDelete }) => {
+  const { selectedPostId } = useContext(PostContext);
+  const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
 
   const fetchComments = useCallback(async () => {
+    if (!selectedPostId) return;
+
     try {
-      const response = await axios.get(`http://localhost:8080/api/posts/${post.id}/comments`);
+      const response = await axios.get(`http://localhost:8080/api/posts/${selectedPostId}/comments`);
       setComments(response.data);
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
-  }, [post.id]);
+  }, [selectedPostId]);
+
+  const fetchPostDetails = useCallback(async () => {
+    if (!selectedPostId) return;
+
+    try {
+      const response = await axios.get(`http://localhost:8080/api/posts/${selectedPostId}`);
+      setPost(response.data);
+    } catch (error) {
+      console.error('Error fetching post details:', error);
+    }
+  }, [selectedPostId]);
 
   useEffect(() => {
+    fetchPostDetails();
     fetchComments();
-  }, [fetchComments]);
+  }, [fetchPostDetails, fetchComments]);
+
+  if (!post) return null;
 
   return (
     <div className="postDetail-container">

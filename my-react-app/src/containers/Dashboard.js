@@ -1,18 +1,26 @@
 // Dashboard.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import Posts from '../components/Posts';
 import PostDetails from '../components/PostDetails';
 import AddPost from '../components/AddPost';
+import { PostContext } from '../components/PostContext';
 
 const Dashboard = () => {
   const [posts, setPosts] = useState([]);
+  const { selectedPostId, setSelectedPostId } = useContext(PostContext);
   const [selectedPost, setSelectedPost] = useState(null);
   const [title, setTitle] = useState('');
 
   useEffect(() => {
     fetchPosts();
   }, []);
+
+  useEffect(() => {
+    if (selectedPostId !== null) {
+      fetchPostDetails(selectedPostId);
+    }
+  }, [selectedPostId]);
 
   const fetchPosts = async () => {
     try {
@@ -23,13 +31,17 @@ const Dashboard = () => {
     }
   };
 
-  const handleSelectPost = async (post) => {
+  const fetchPostDetails = async (postId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/posts/${post.id}`);
+      const response = await axios.get(`http://localhost:8080/api/posts/${postId}`);
       setSelectedPost(response.data);
     } catch (error) {
       console.error('Error fetching post details:', error);
     }
+  };
+
+  const handleSelectPost = (post) => {
+    setSelectedPostId(post.id);
   };
 
   const handleChangeTitle = async () => {
@@ -48,7 +60,7 @@ const Dashboard = () => {
     try {
       await axios.delete(`http://localhost:8080/api/posts/${postId}`);
       fetchPosts(); // Update posts list
-      setSelectedPost(null); // Clear selected post
+      setSelectedPostId(null); // Clear selected post
     } catch (error) {
       console.error('Error deleting post:', error);
     }

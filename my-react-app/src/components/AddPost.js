@@ -1,22 +1,26 @@
-
-import React, { useState } from 'react';
+// AddPost.js
+import React, { useRef } from 'react';
 import axios from 'axios';
 
 const AddPost = ({ onPostAdded }) => {
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [content, setContent] = useState('');
+  const titleRef = useRef();
+  const authorRef = useRef();
+  const contentRef = useRef();
 
   const handleAddPost = async () => {
+    const title = titleRef.current.value;
+    const author = authorRef.current.value;
+    const content = contentRef.current.value;
+
     if (title.trim() === '' || author.trim() === '' || content.trim() === '') {
       return;
     }
     try {
       await axios.post('http://localhost:8080/api/posts', { title, author, content });
-      onPostAdded(); // Fetch updated posts list
-      setTitle('');
-      setAuthor('');
-      setContent('');
+      onPostAdded();
+      titleRef.current.value = '';
+      authorRef.current.value = '';
+      contentRef.current.value = '';
     } catch (error) {
       console.error('Error adding post:', error);
     }
@@ -26,24 +30,21 @@ const AddPost = ({ onPostAdded }) => {
     <div className='addPost-Container'>
       <input
         type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        ref={titleRef}
         placeholder="Title"
       />
-      <br></br>
+      <br />
       <input
         type="text"
-        value={author}
-        onChange={(e) => setAuthor(e.target.value)}
+        ref={authorRef}
         placeholder="Author"
       />
-       <br></br>
+      <br />
       <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
+        ref={contentRef}
         placeholder="Content"
       ></textarea>
-      <br></br>
+      <br />
       <button onClick={handleAddPost}>Add Post</button>
     </div>
   );
